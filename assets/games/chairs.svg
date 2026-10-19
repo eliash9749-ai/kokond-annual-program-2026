@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="900" height="560" viewBox="0 0 900 560">
+<defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#0b6b46"/><stop offset="1" stop-color="#d39b2a"/></linearGradient><pattern id="p" width="50" height="50" patternUnits="userSpaceOnUse"><path d="M25 3L47 25 25 47 3 25Z" fill="none" stroke="#fff" stroke-opacity=".09" stroke-width="2"/></pattern></defs>
+<rect width="900" height="560" fill="url(#g)"/><rect width="900" height="560" fill="url(#p)"/>
+<circle cx="450" cy="225" r="145" fill="#fff" fill-opacity=".12"/><text x="450" y="290" text-anchor="middle" font-size="180">🪑</text>
+<rect y="430" width="900" height="130" fill="#061f18" fill-opacity=".7"/><text x="450" y="505" text-anchor="middle" font-family="sans-serif" font-size="45" font-weight="700" fill="white">চেয়ার দখলের লড়াই</text></svg>
