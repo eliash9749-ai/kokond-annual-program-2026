@@ -60,3 +60,65 @@ fetch(API + '?action=members')
     });
   })
   .catch(err => console.error('Committee load error:', err));
+
+  // ===== DONATIONS 2026 =====
+const donationList = document.getElementById('donationList');
+
+if (donationList) {
+  fetch(API + '?action=donations')
+    .then(response => response.json())
+    .then(data => {
+
+      // Summary
+      document.getElementById('totalPromised').textContent =
+        '₹' + Number(data.summary?.promised || 0).toLocaleString('en-IN');
+
+      document.getElementById('totalPaid').textContent =
+        '₹' + Number(data.summary?.paid || 0).toLocaleString('en-IN');
+
+      document.getElementById('totalDue').textContent =
+        '₹' + Number(data.summary?.due || 0).toLocaleString('en-IN');
+
+      // Clear loading text
+      donationList.innerHTML = '';
+
+      if (!data.donations || data.donations.length === 0) {
+        donationList.innerHTML =
+          '<p class="donation-loading">এখনও কোনো অনুদানের তথ্য যোগ করা হয়নি।</p>';
+        return;
+      }
+
+      // Create each donation card
+      data.donations.forEach(item => {
+
+        const isPaid =
+          String(item.status).toLowerCase() === 'paid';
+
+        const card = document.createElement('div');
+        card.className =
+          'donation-card ' + (isPaid ? 'donation-paid' : 'donation-unpaid');
+
+        card.innerHTML = `
+          <div class="donor-info">
+            <h3>${item.name}</h3>
+            <span>প্রতিশ্রুত অনুদান</span>
+          </div>
+
+          
+
+          <div class="donation-amount">
+  ${item.promise || ('₹' + Number(item.amount || 0).toLocaleString('en-IN'))}
+</div>
+        `;
+
+        donationList.appendChild(card);
+      });
+
+    })
+    .catch(error => {
+      console.error('Donation load error:', error);
+
+      donationList.innerHTML =
+        '<p class="donation-loading">অনুদানের তথ্য লোড করা যায়নি।</p>';
+    });
+}
