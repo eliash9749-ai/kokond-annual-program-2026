@@ -1,6 +1,6 @@
 /* KACP 2026 - Main JavaScript */
 
-const API_URL = ""; // Apps Script Deploy করার পর এখানে URL বসবে।
+const API_URL = "https://script.google.com/macros/s/AKfycbx1URZSY_flYeQJ1CrLOinpSU-siRBrVsuZclk69LtqYRIOn2W7X8yMiCh5Dh2GVmtU/exec"; // Apps Script Deploy করার পর এখানে URL বসবে।
 
 const COMPETITIONS = [
   "ম্যারাথন দৌড়",
