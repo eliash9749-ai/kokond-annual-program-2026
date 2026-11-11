@@ -1,7 +1,29 @@
 
-const API = 'https://script.google.com/macros/s/AKfycbypbMWRELyljKzlsaQntvjoFJhbz7gsSpGPXi18lJ_E5NHJdFRksykrMzGnQItMkYkt/exec';
+/************************************************************
+ KOKOND ANNUAL PROGRAM 2026
+ COMPLETE FRONTEND JAVASCRIPT V5
 
-const TBA = 'সময়সূচি অনুষ্ঠানের দিন প্রকাশ করা হবে';
+ Compatible with:
+ - index.html V5
+ - Code.gs V5
+
+ Features:
+ Registration | Multiple Events | Certificates
+ Schedule | Committee | KYC | Donations | Countdown
+************************************************************/
+
+
+/* =========================================================
+   1. API CONFIGURATION
+========================================================= */
+
+const API_URL =
+  'https://script.google.com/macros/s/AKfycbypbMWRELyljKzlsaQntvjoFJhbz7gsSpGPXi18lJ_E5NHJdFRksykrMzGnQItMkYkt/exec';
+
+
+/* =========================================================
+   2. COMPETITION DATA
+========================================================= */
 
 const games = [
   ['marathon', 'ম্যারাথন দৌড়', '৩০ ডিসেম্বর', '১০:০০ AM'],
@@ -16,30 +38,40 @@ const games = [
 
   ['pot', 'হাঁড়ি ভাঙা', '৩১ ডিসেম্বর', '০৯:০০ AM'],
   ['poetry', 'কবিতা আবৃত্তি', '৩১ ডিসেম্বর', '১০:০০ AM'],
-  ['cricket', 'ক্রিকেট টুর্নামেন্ট', '৩১ ডিসেম্বর', TBA],
+  ['cricket', 'ক্রিকেট টুর্নামেন্ট', '৩১ ডিসেম্বর', 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'],
   ['tug', 'দড়ি টানাটানি', '৩১ ডিসেম্বর', '১২:০০ PM'],
-  ['duck', 'হাঁসধরা', '৩১ ডিসেম্বর', TBA],
-  ['freeze', 'গজল থামলেই স্থির', '৩১ ডিসেম্বর', TBA],
+  ['duck', 'হাঁসধরা', '৩১ ডিসেম্বর', 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'],
+  ['freeze', 'গজল থামলেই স্থির', '৩১ ডিসেম্বর', 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'],
   ['throw', 'বল ছোঁড়া', '৩১ ডিসেম্বর', '০৩:০০ PM'],
   ['ghazal', 'গজল আবৃত্তি', '৩১ ডিসেম্বর', '০৪:০০ PM'],
   ['speech', 'বক্তৃতা প্রতিযোগিতা', '৩১ ডিসেম্বর', '০৫:০০ PM']
 ];
 
-const d1 = [
-  ['০৯:০০ AM', 'পবিত্র কোরআন তেলাওয়াত'],
-  ['০৯:৩০ AM', 'জাতীয় পতাকা উত্তোলন'],
-  ['০৯:৩০ AM', 'প্রভাতফেরী'],
-  ...games.slice(0, 9).map(g => [g[3], g[1]])
+
+/* =========================================================
+   3. ELIGIBILITY DATA
+========================================================= */
+
+const WOMEN_ONLY_EVENTS = [
+  'চেয়ার দখলের লড়াই',
+  'কে সেরা রাঁধুনি'
 ];
 
-const d2 = [
-  ...games.slice(9).map(g => [g[3], g[1]]),
-  ['০৫:৩০ PM', 'আল্লাহ্ আল্লাহ্ প্রতিযোগিতা'],
-  ['০৬:০০ PM', 'পুরস্কার বিতরণী অনুষ্ঠান'],
-  ['১০:০০ PM–১২:০০ AM', 'পীরজাদা উজায়ের সিদ্দিকীর বিশেষ ধর্মীয় আলোচনা']
+const BOYS_ONLY_EVENTS = [
+  'আজান প্রতিযোগিতা',
+  'ক্রিকেট টুর্নামেন্ট',
+  'দড়ি টানাটানি',
+  'হাঁসধরা'
 ];
 
-const members = [
+const BEST_COOK_EVENT = 'কে সেরা রাঁধুনি';
+
+
+/* =========================================================
+   4. INITIAL COMMITTEE MEMBERS
+========================================================= */
+
+const initialMembers = [
   'হাসিকুল মহম্মদ সেক',
   'সমির আলি খান',
   'ফারদিন আক্তার মল্লিক',
@@ -68,598 +100,1135 @@ const members = [
   'সারবিন মল্লিক'
 ];
 
-// ===============================
-// COMPETITION CARDS & REGISTRATION CHECKBOXES
-// ===============================
 
-const grid = document.querySelector('#gameGrid');
-const checks = document.querySelector('#eventChecks');
+/* =========================================================
+   5. COMMON HELPERS
+========================================================= */
 
-if (grid && checks) {
-  grid.innerHTML = '';
-  checks.innerHTML = '';
-
-  games.forEach(g => {
-    grid.insertAdjacentHTML('beforeend', `
-      <article class="game-card">
-        <img src="assets/games/${g[0]}.svg" alt="${g[1]}">
-        <div class="game-info">
-          <h3>${g[1]}</h3>
-          <p>📅 ${g[2]} ২০২৬</p>
-          <p>🕒 ${g[3]}</p>
-          <button class="mini registerGame" data-game="${g[1]}">
-            এই প্রতিযোগিতায় নাম দিন →
-          </button>
-        </div>
-      </article>
-    `);
-
-    checks.insertAdjacentHTML('beforeend', `
-      <label>
-        <input type="checkbox" name="events" value="${g[1]}">
-        ${g[1]}
-      </label>
-    `);
-  });
+function getElement(id) {
+  return document.getElementById(id);
 }
 
-// ===============================
-// EVENT SCHEDULE
-// ===============================
+function escapeHTML(value) {
+  return String(value == null ? '' : value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
 
-function rows(id, data) {
-  const element = document.querySelector(id);
+function showMessage(element, message, type = 'info') {
   if (!element) return;
 
-  element.innerHTML = data.map(x => `
-    <div class="time-row">
-      <b>${x[0]}</b>
-      <span>${x[1]}</span>
-    </div>
-  `).join('');
+  element.textContent = message;
+  element.className = 'registration-message ' + type;
 }
 
-rows('#day1', d1);
-rows('#day2', d2);
+function formatMoney(value) {
+  return '₹' + Number(value || 0).toLocaleString('en-IN');
+}
 
-// ===============================
-// COMMITTEE MEMBERS
-// ===============================
+function apiPost(data) {
+  const body = new URLSearchParams();
 
-const cgrid = document.querySelector('#committeeGrid');
+  Object.keys(data).forEach(key => {
+    const value = data[key];
 
-if (cgrid) {
-  members.forEach(n => {
-    cgrid.insertAdjacentHTML('beforeend', `
-      <article class="member-card">
-        <h4>${n}</h4>
-        <small>● KYC Required</small>
-        <br>
-        <button class="mini kycOpen" data-member="${n}">
-          Profile Update / KYC
-        </button>
-      </article>
-    `);
+    if (Array.isArray(value)) {
+      value.forEach(item => body.append(key, item));
+    } else {
+      body.append(key, value == null ? '' : value);
+    }
   });
-}
 
-// ===============================
-// COUNTDOWN
-// ===============================
-
-function cd() {
-  const el = document.querySelector('#countdown');
-  if (!el) return;
-
-  const target = new Date('2026-12-30T09:00:00+05:30');
-  const t = target - new Date();
-
-  if (t <= 0) {
-    el.innerHTML = '<b>অনুষ্ঠান শুরু হয়েছে</b>';
-    return;
-  }
-
-  const d = Math.floor(t / 864e5);
-  const h = Math.floor(t / 36e5) % 24;
-  const m = Math.floor(t / 6e4) % 60;
-  const s = Math.floor(t / 1e3) % 60;
-
-  el.innerHTML = `
-    <b>${d}<small>দিন</small></b>
-    <b>${h}<small>ঘণ্টা</small></b>
-    <b>${m}<small>মিনিট</small></b>
-    <b>${s}<small>সেকেন্ড</small></b>
-  `;
-}
-
-cd();
-setInterval(cd, 1000);
-
-// ===============================
-// HERO SLIDER
-// ===============================
-
-let si = 0;
-
-setInterval(() => {
-  const slides = [...document.querySelectorAll('.hero-slide')];
-  const dots = [...document.querySelectorAll('.dots i')];
-
-  if (!slides.length || !dots.length) return;
-
-  slides[si]?.classList.remove('active');
-  dots[si]?.classList.remove('on');
-
-  si = (si + 1) % slides.length;
-
-  slides[si]?.classList.add('active');
-  dots[si]?.classList.add('on');
-}, 6500);
-
-// ===============================
-// MOBILE MENU
-// ===============================
-
-const menuBtn = document.querySelector('#menuBtn');
-const nav = document.querySelector('#nav');
-
-if (menuBtn && nav) {
-  menuBtn.onclick = () => nav.classList.toggle('open');
-}
-
-// ===============================
-// API HELPER
-// ===============================
-
-async function postForm(data) {
-  const response = await fetch(API, {
+  return fetch(API_URL, {
     method: 'POST',
-    body: data
-  });
-
-  if (!response.ok) {
-    throw new Error('Server response error');
-  }
-
-  return await response.text();
-}
-
-// ===============================
-// MODAL
-// ===============================
-
-const modal = document.querySelector('#modal');
-const body = document.querySelector('#modalBody');
-const modalClose = document.querySelector('#modalClose');
-
-if (modalClose && modal) {
-  modalClose.onclick = () => modal.classList.remove('show');
-}
-
-if (modal) {
-  modal.onclick = e => {
-    if (e.target === modal) {
-      modal.classList.remove('show');
-    }
-  };
-}
-
-// ===============================
-// PHOTO UPLOAD HELPERS
-// ===============================
-
-function photoField() {
-  return `
-    <label>
-      নিজের ছবি
-      <input type="file" name="photo" accept="image/*" required>
-    </label>
-    <img class="upload-preview" alt="preview">
-  `;
-}
-
-function bindPhoto(form) {
-  const inp = form.querySelector('[name=photo]');
-  const img = form.querySelector('.upload-preview');
-
-  if (!inp || !img) return;
-
-  inp.onchange = () => {
-    if (inp.files[0]) {
-      img.src = URL.createObjectURL(inp.files[0]);
-      img.style.display = 'block';
-    }
-  };
-}
-
-function file64(file) {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      resolve(String(reader.result).split(',')[1]);
-    };
-
-    reader.onerror = reject;
-    reader.readAsDataURL(file);
-  });
-}
-
-// ===============================
-// KYC FORM
-// ===============================
-
-function openKyc(name) {
-  if (!body || !modal) return;
-
-  body.innerHTML = `
-    <h2>🔴 KYC / Profile Update</h2>
-    <p><b>${name}</b>-এর প্রোফাইল সম্পূর্ণ করার অনুরোধ।</p>
-
-    <form id="kycForm">
-      <input type="hidden" name="action" value="kyc">
-      <input type="hidden" name="memberName" value="${name}">
-
-      <label>
-        নাম
-        <input value="${name}" disabled>
-      </label>
-
-      <label>
-        মোবাইল নম্বর
-        <input name="mobile" pattern="[0-9]{10}" required>
-      </label>
-
-      ${photoField()}
-
-      <p class="privacy">
-        তথ্য সরাসরি public হবে না। Program Manager-এর অনুমোদনের পর
-        প্রোফাইল সম্পূর্ণ হবে।
-      </p>
-
-      <button class="btn primary">KYC জমা দিন</button>
-      <p class="form-msg"></p>
-    </form>
-  `;
-
-  modal.classList.add('show');
-
-  const form = document.querySelector('#kycForm');
-  bindPhoto(form);
-  form.onsubmit = submitMemberForm;
-}
-
-// ===============================
-// NEW COMMITTEE MEMBER APPLICATION
-// ===============================
-
-const joinOpen = document.querySelector('#joinOpen');
-
-if (joinOpen) {
-  joinOpen.onclick = () => {
-    if (!body || !modal) return;
-
-    body.innerHTML = `
-      <h2>কমিটির সদস্য হতে আবেদন</h2>
-
-      <form id="joinForm">
-        <input type="hidden" name="action" value="newMember">
-
-        <label>
-          পূর্ণ নাম
-          <input name="memberName" required>
-        </label>
-
-        <label>
-          মোবাইল নম্বর
-          <input name="mobile" pattern="[0-9]{10}" required>
-        </label>
-
-        ${photoField()}
-
-        <p class="privacy">
-          আবেদনটি Pending থাকবে। Program Manager অনুমোদন করলে
-          Committee card তৈরি হবে।
-        </p>
-
-        <button class="btn primary">আবেদন জমা দিন</button>
-        <p class="form-msg"></p>
-      </form>
-    `;
-
-    modal.classList.add('show');
-
-    const form = document.querySelector('#joinForm');
-    bindPhoto(form);
-    form.onsubmit = submitMemberForm;
-  };
-}
-
-// ===============================
-// KYC / MEMBER APPLICATION SUBMISSION
-// ===============================
-
-async function submitMemberForm(e) {
-  e.preventDefault();
-
-  const form = e.target;
-  const msg = form.querySelector('.form-msg');
-  const file = form.querySelector('[name=photo]')?.files[0];
-
-  if (!file) {
-    msg.textContent = 'অনুগ্রহ করে নিজের ছবি নির্বাচন করুন।';
-    return;
-  }
-
-  if (file.size > 2.5 * 1024 * 1024) {
-    msg.textContent = 'ছবির size 2.5MB-এর কম রাখুন।';
-    return;
-  }
-
-  msg.textContent = 'ছবি ও তথ্য পাঠানো হচ্ছে...';
-
-  try {
-    const fd = new FormData(form);
-
-    fd.append('photoBase64', await file64(file));
-    fd.append('photoType', file.type);
-    fd.append('photoName', file.name);
-    fd.delete('photo');
-
-    const txt = await postForm(fd);
-
-    let data;
+    body: body
+  }).then(async response => {
+    const text = await response.text();
 
     try {
-      data = JSON.parse(txt);
+      return JSON.parse(text);
     } catch (error) {
-      data = null;
+      throw new Error('সার্ভার থেকে সঠিক উত্তর পাওয়া যায়নি।');
     }
-
-    if (data?.status === 'success') {
-      msg.textContent =
-        '✅ জমা হয়েছে। Program Manager অনুমোদন করলে প্রোফাইল আপডেট হবে।';
-
-      form.querySelector('button').disabled = true;
-    } else {
-      msg.textContent =
-        '⚠️ ' + (data?.message ||
-        'KYC request গ্রহণ করা যায়নি। Apps Script deployment পরীক্ষা করুন।');
-    }
-  } catch (error) {
-    console.error('Member form error:', error);
-
-    msg.textContent =
-      '❌ পাঠানো যায়নি। ইন্টারনেট অথবা Apps Script পরীক্ষা করুন।';
-  }
+  });
 }
 
-// ===============================
-// CLICK EVENTS
-// ===============================
+function apiGet(action) {
+  const url = API_URL + '?action=' + encodeURIComponent(action);
 
-document.addEventListener('click', e => {
-  const registerButton = e.target.closest('.registerGame');
+  return fetch(url, {
+    method: 'GET',
+    cache: 'no-store'
+  }).then(async response => {
+    const text = await response.text();
 
-  if (registerButton) {
-    const selectedGame = registerButton.dataset.game;
+    try {
+      return JSON.parse(text);
+    } catch (error) {
+      throw new Error('তথ্য লোড করা যায়নি।');
+    }
+  });
+}
 
-    document.querySelectorAll('[name=events]').forEach(input => {
-      input.checked = input.value === selectedGame;
+
+/* =========================================================
+   6. COMPETITION CARDS
+========================================================= */
+
+function renderGames() {
+  const grid = getElement('gameGrid');
+
+  if (!grid) return;
+
+  grid.innerHTML = '';
+
+  games.forEach((game, index) => {
+    const id = game[0];
+    const name = game[1];
+    const date = game[2];
+    const time = game[3];
+
+    const isTBA = time.includes('অনুষ্ঠানের দিন');
+
+    const card = document.createElement('div');
+
+    card.className = 'game-card';
+
+    card.innerHTML = `
+      <div class="game-number">
+        ${String(index + 1).padStart(2, '0')}
+      </div>
+
+      <div class="game-card-content">
+        <h3>${escapeHTML(name)}</h3>
+
+        <p class="game-date">
+          ${escapeHTML(date)} ২০২৬
+        </p>
+
+        <p class="game-time">
+          ${isTBA
+            ? escapeHTML(time)
+            : 'সময়: ' + escapeHTML(time)}
+        </p>
+      </div>
+    `;
+
+    grid.appendChild(card);
+  });
+}
+
+
+/* =========================================================
+   7. REGISTRATION CHECKBOXES
+========================================================= */
+
+function renderEventCheckboxes() {
+  const container = getElement('eventChecks');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  games.forEach(game => {
+    const eventName = game[1];
+    const eventId = game[0];
+
+    const wrapper = document.createElement('label');
+
+    wrapper.className = 'event-option';
+
+    wrapper.innerHTML = `
+      <input
+        type="checkbox"
+        name="events"
+        value="${escapeHTML(eventName)}"
+        id="event-${escapeHTML(eventId)}"
+      >
+
+      <span>${escapeHTML(eventName)}</span>
+    `;
+
+    container.appendChild(wrapper);
+  });
+}
+
+
+/* =========================================================
+   8. SCHEDULE
+========================================================= */
+
+function renderSchedule() {
+  const day1 = getElement('day1');
+  const day2 = getElement('day2');
+
+  if (!day1 || !day2) return;
+
+  day1.innerHTML = '';
+  day2.innerHTML = '';
+
+  const firstDayEvents = games.slice(0, 9);
+  const secondDayEvents = games.slice(9);
+
+  const day1Opening = [
+    {
+      name: 'অনুষ্ঠানের উদ্বোধন',
+      time: 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'
+    }
+  ];
+
+  const day2Special = [
+    {
+      name: 'বিশেষ Quiz প্রতিযোগিতা',
+      time: 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'
+    },
+    {
+      name: 'আল্লাহু আল্লাহু পরিবেশনা',
+      time: 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'
+    },
+    {
+      name: 'পুরস্কার বিতরণী',
+      time: 'সময় অনুষ্ঠানের দিন প্রকাশ করা হবে'
+    },
+    {
+      name: 'বিশেষ বক্তব্য — পিরজাদা উজায়ের সিদ্দিকী',
+      time: 'রাত ১০টা থেকে ১২টা'
+    }
+  ];
+
+  [...day1Opening, ...firstDayEvents.map(g => ({
+    name: g[1],
+    time: g[3]
+  }))].forEach(item => {
+    day1.appendChild(createScheduleItem(item));
+  });
+
+  [...secondDayEvents.map(g => ({
+    name: g[1],
+    time: g[3]
+  })), ...day2Special].forEach(item => {
+    day2.appendChild(createScheduleItem(item));
+  });
+}
+
+function createScheduleItem(item) {
+  const div = document.createElement('div');
+
+  div.className = 'schedule-item';
+
+  const timeIsTBA = String(item.time).includes('অনুষ্ঠানের দিন');
+
+  div.innerHTML = `
+    <div class="schedule-time">
+      ${timeIsTBA
+        ? 'সময় পরে ঘোষণা করা হবে'
+        : escapeHTML(item.time)}
+    </div>
+
+    <div class="schedule-event">
+      ${escapeHTML(item.name)}
+    </div>
+  `;
+
+  return div;
+}
+
+
+/* =========================================================
+   9. REGISTRATION FORM
+========================================================= */
+
+function getSelectedEvents() {
+  return Array.from(
+    document.querySelectorAll('#eventChecks input[name="events"]:checked')
+  ).map(input => input.value);
+}
+
+function validateRegistration(data) {
+  if (!data.name.trim()) {
+    return 'অংশগ্রহণকারীর নাম লিখুন।';
+  }
+
+  if (!/^[0-9]{10}$/.test(data.mobile)) {
+    return 'সঠিক ১০ সংখ্যার মোবাইল নম্বর লিখুন।';
+  }
+
+  if (!data.guardianName.trim()) {
+    return 'অভিভাবকের নাম লিখুন।';
+  }
+
+  if (!data.village.trim()) {
+    return 'গ্রামের নাম লিখুন।';
+  }
+
+  const age = Number(data.age);
+
+  if (!Number.isInteger(age) || age < 1 || age > 100) {
+    return 'সঠিক বয়স লিখুন।';
+  }
+
+  if (!data.gender) {
+    return 'লিঙ্গ নির্বাচন করুন।';
+  }
+
+  if (age < 18 && !data.guardianConsent) {
+    return '১৮ বছরের কম বয়সীদের অভিভাবকের সম্মতি আবশ্যক।';
+  }
+
+  if (!data.events.length) {
+    return 'কমপক্ষে একটি প্রতিযোগিতা নির্বাচন করুন।';
+  }
+
+  if (data.events.length > 18) {
+    return 'সর্বোচ্চ ১৮টি প্রতিযোগিতা নির্বাচন করতে পারবেন।';
+  }
+
+  for (const event of data.events) {
+    if (
+      WOMEN_ONLY_EVENTS.includes(event) &&
+      data.gender !== 'মহিলা'
+    ) {
+      return event + ' শুধুমাত্র মহিলাদের জন্য।';
+    }
+
+    if (
+      BOYS_ONLY_EVENTS.includes(event) &&
+      data.gender !== 'পুরুষ'
+    ) {
+      return event + ' শুধুমাত্র ছেলেদের জন্য।';
+    }
+  }
+
+  return '';
+}
+
+
+function displayCertificates(registrations) {
+  const container = getElement('certificateLinks');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (!registrations || !registrations.length) return;
+
+  const heading = document.createElement('h3');
+  heading.textContent = 'আপনার নিবন্ধন সম্পন্ন হয়েছে';
+
+  container.appendChild(heading);
+
+  const description = document.createElement('p');
+  description.textContent =
+    'প্রতিটি প্রতিযোগিতার জন্য আলাদা Registration ID এবং Certificate PDF নিচে দেওয়া হলো।';
+
+  container.appendChild(description);
+
+  registrations.forEach(reg => {
+    const card = document.createElement('div');
+
+    card.className = 'certificate-card';
+
+    const name = document.createElement('strong');
+    name.textContent = reg.event;
+
+    const id = document.createElement('p');
+    id.textContent = 'Registration ID: ' + reg.registrationNo;
+
+    card.appendChild(name);
+    card.appendChild(id);
+
+    if (reg.certificateUrl) {
+      const link = document.createElement('a');
+
+      link.href = reg.certificateUrl;
+      link.target = '_blank';
+      link.rel = 'noopener';
+      link.textContent = 'Certificate PDF খুলুন / Download করুন';
+
+      card.appendChild(link);
+    } else {
+      const warning = document.createElement('p');
+
+      warning.textContent =
+        'Certificate তৈরি করা যায়নি। আপনার Registration ID সংরক্ষণ করুন।';
+
+      card.appendChild(warning);
+    }
+
+    container.appendChild(card);
+  });
+}
+
+
+function setupRegistration() {
+  const form = getElement('registrationForm');
+
+  if (!form) return;
+
+  const ageInput = getElement('participantAge');
+  const consentBox = getElement('guardianConsentBox');
+  const consentInput = getElement('guardianConsent');
+  const genderInput = getElement('participantGender');
+
+  // Under 18 consent field visibility
+  function updateConsentVisibility() {
+    const age = Number(ageInput.value);
+
+    if (consentBox) {
+      consentBox.style.display = age > 0 && age < 18 ? 'block' : 'none';
+    }
+
+    if (consentInput && (age >= 18 || !age)) {
+      consentInput.checked = false;
+    }
+  }
+
+  if (ageInput) {
+    ageInput.addEventListener('input', updateConsentVisibility);
+    updateConsentVisibility();
+  }
+
+  // Clear selection warning when gender changes
+  if (genderInput) {
+    genderInput.addEventListener('change', function () {
+      const gender = genderInput.value;
+
+      document.querySelectorAll('#eventChecks input:checked')
+        .forEach(input => {
+          const event = input.value;
+
+          if (
+            (WOMEN_ONLY_EVENTS.includes(event) && gender !== 'মহিলা') ||
+            (BOYS_ONLY_EVENTS.includes(event) && gender !== 'পুরুষ')
+          ) {
+            input.checked = false;
+          }
+        });
     });
-
-    location.hash = 'registration';
   }
 
-  const kycButton = e.target.closest('.kycOpen');
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
 
-  if (kycButton) {
-    openKyc(kycButton.dataset.member);
-  }
-});
+    const message = getElement('regMsg');
+    const button = getElement('registrationSubmit');
+    const certificateContainer = getElement('certificateLinks');
 
-// ===============================
-// REGISTRATION FORM
-// ===============================
+    if (certificateContainer) {
+      certificateContainer.innerHTML = '';
+    }
 
-const registrationForm = document.querySelector('#registrationForm');
+    const data = {
+      name: getElement('participantName').value.trim(),
+      mobile: getElement('participantMobile').value.trim(),
+      guardianName: getElement('guardianName').value.trim(),
+      age: getElement('participantAge').value,
+      village: getElement('participantVillage').value.trim(),
+      gender: getElement('participantGender').value,
+      guardianConsent: getElement('guardianConsent').checked,
+      events: getSelectedEvents()
+    };
 
-if (registrationForm) {
-  registrationForm.onsubmit = async e => {
-    e.preventDefault();
+    const validationError = validateRegistration(data);
 
-    const form = e.target;
-    const fd = new FormData(form);
-
-    const selected = [
-      ...document.querySelectorAll('[name=events]:checked')
-    ].map(input => input.value);
-
-    const msg = document.querySelector('#regMsg');
-
-    if (!selected.length) {
-      msg.textContent = 'কমপক্ষে একটি প্রতিযোগিতা নির্বাচন করুন।';
+    if (validationError) {
+      showMessage(message, validationError, 'error');
       return;
     }
 
-    msg.textContent = 'নিবন্ধন জমা হচ্ছে...';
+    const declaration = getElement('registrationDeclaration');
 
-    const submitButton = form.querySelector('[type=submit]');
+    if (!declaration || !declaration.checked) {
+      showMessage(
+        message,
+        'নিবন্ধনের আগে ঘোষণায় সম্মতি দিন।',
+        'error'
+      );
+      return;
+    }
 
-    if (submitButton) submitButton.disabled = true;
+    const confirmation = confirm(
+      'আপনি কি নিচের তথ্য দিয়ে নিবন্ধন সম্পন্ন করতে চান?\n\n' +
+      'নাম: ' + data.name + '\n' +
+      'মোবাইল: ' + data.mobile + '\n' +
+      'প্রতিযোগিতা: ' + data.events.join(', ') + '\n\n' +
+      'নিবন্ধনের পর তথ্য পরিবর্তন করা যাবে না।'
+    );
+
+    if (!confirmation) return;
+
+    button.disabled = true;
+    button.textContent = 'নিবন্ধন হচ্ছে...';
+
+    showMessage(
+      message,
+      'আপনার নিবন্ধন প্রক্রিয়াধীন। অনুগ্রহ করে অপেক্ষা করুন...',
+      'info'
+    );
 
     try {
-      // বর্তমান Backend-এর সঙ্গে সামঞ্জস্য রেখে
-      // প্রতিটি প্রতিযোগিতার জন্য আলাদা request পাঠানো হচ্ছে।
-      for (const eventName of selected) {
-        const data = new FormData();
+      const response = await apiPost({
+        action: 'registration',
+        name: data.name,
+        mobile: data.mobile,
+        guardianName: data.guardianName,
+        age: data.age,
+        village: data.village,
+        gender: data.gender,
+        guardianConsent: data.guardianConsent ? 'yes' : 'no',
+        events: data.events
+      });
 
-        data.append('name', fd.get('name') || '');
-        data.append('mobile', fd.get('mobile') || '');
-        data.append('age', fd.get('age') || '');
-        data.append('event', eventName);
-
-        await postForm(data);
+      if (response.status !== 'success') {
+        throw new Error(response.message || 'নিবন্ধন সম্পন্ন হয়নি।');
       }
 
-      msg.textContent =
-        '✅ নিবন্ধন সফল হয়েছে। Google Sheet-এ তথ্য পাঠানো হয়েছে।';
+      showMessage(
+        message,
+        response.message || 'নিবন্ধন সফল হয়েছে।',
+        'success'
+      );
+
+      displayCertificates(response.registrations);
+
+      if (response.bestCookNotice) {
+        const notice = document.createElement('p');
+        notice.className = 'best-cook-notice';
+        notice.textContent = response.bestCookNotice;
+
+        if (certificateContainer) {
+          certificateContainer.appendChild(notice);
+        }
+      }
+
+      // Clear form only after successful registration
+      form.reset();
+      updateConsentVisibility();
+
+    } catch (error) {
+      showMessage(
+        message,
+        error.message || 'নিবন্ধন করতে সমস্যা হয়েছে। আবার চেষ্টা করুন।',
+        'error'
+      );
+
+    } finally {
+      button.disabled = false;
+      button.textContent = 'নিবন্ধন সম্পন্ন করুন';
+    }
+  });
+}
+
+
+/* =========================================================
+   10. COMMITTEE MEMBERS
+========================================================= */
+
+function renderInitialMembers() {
+  const grid = getElement('committeeGrid');
+
+  if (!grid) return;
+
+  grid.innerHTML = '';
+
+  initialMembers.forEach((name, index) => {
+    const card = document.createElement('div');
+
+    card.className = 'committee-card';
+
+    card.innerHTML = `
+      <div class="committee-avatar">
+        ${escapeHTML(name.charAt(0))}
+      </div>
+
+      <h3>${escapeHTML(name)}</h3>
+
+      <p>কমিটির সদস্য</p>
+    `;
+
+    if (index === 0) {
+      card.classList.add('featured-member');
+    }
+
+    grid.appendChild(card);
+  });
+
+  const manager = document.createElement('div');
+
+  manager.className = 'committee-card featured-member';
+
+  manager.innerHTML = `
+    <div class="committee-avatar">E</div>
+    <h3>Eliash Khan</h3>
+    <p>Program Manager</p>
+  `;
+
+  grid.prepend(manager);
+}
+
+
+async function loadApprovedMembers() {
+  try {
+    const response = await apiGet('members');
+
+    if (
+      response.status !== 'success' ||
+      !Array.isArray(response.members)
+    ) {
+      return;
+    }
+
+    const grid = getElement('committeeGrid');
+
+    if (!grid) return;
+
+    response.members.forEach(member => {
+      const exists = Array.from(
+        grid.querySelectorAll('h3')
+      ).some(h => h.textContent.trim() === member.name);
+
+      if (exists) return;
+
+      const card = document.createElement('div');
+
+      card.className = 'committee-card';
+
+      if (member.photoUrl) {
+        const image = document.createElement('img');
+
+        image.src = member.photoUrl;
+        image.alt = member.name;
+        image.loading = 'lazy';
+
+        card.appendChild(image);
+      } else {
+        const avatar = document.createElement('div');
+
+        avatar.className = 'committee-avatar';
+        avatar.textContent = member.name.charAt(0);
+
+        card.appendChild(avatar);
+      }
+
+      const heading = document.createElement('h3');
+      heading.textContent = member.name;
+
+      const role = document.createElement('p');
+      role.textContent = member.role || 'কমিটির সদস্য';
+
+      card.appendChild(heading);
+      card.appendChild(role);
+
+      grid.appendChild(card);
+    });
+
+  } catch (error) {
+    console.warn('Committee loading failed:', error);
+  }
+}
+
+
+/* =========================================================
+   11. MODAL SYSTEM
+========================================================= */
+
+function openModal(content) {
+  const modal = getElement('modal');
+  const body = getElement('modalBody');
+
+  if (!modal || !body) return;
+
+  body.innerHTML = content;
+  modal.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal() {
+  const modal = getElement('modal');
+
+  if (!modal) return;
+
+  modal.classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+function setupModal() {
+  const modal = getElement('modal');
+  const closeButton = getElement('modalClose');
+
+  if (closeButton) {
+    closeButton.addEventListener('click', closeModal);
+  }
+
+  if (modal) {
+    modal.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        closeModal();
+      }
+    });
+  }
+
+  document.addEventListener('keydown', function (event) {
+    if (event.key === 'Escape') {
+      closeModal();
+    }
+  });
+}
+
+
+/* =========================================================
+   12. KYC / NEW MEMBER FORM
+========================================================= */
+
+function openMemberForm(type) {
+  const isKYC = type === 'kyc';
+
+  const title = isKYC
+    ? 'KYC তথ্য সম্পূর্ণ করুন'
+    : 'নতুন সদস্য হওয়ার আবেদন';
+
+  const content = `
+    <h2>${title}</h2>
+
+    <form id="memberRequestForm">
+
+      <div class="form-group">
+        <label for="memberName">সম্পূর্ণ নাম *</label>
+
+        <input
+          type="text"
+          id="memberName"
+          name="memberName"
+          required
+          placeholder="আপনার নাম"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="memberMobile">মোবাইল নম্বর *</label>
+
+        <input
+          type="tel"
+          id="memberMobile"
+          name="mobile"
+          maxlength="10"
+          pattern="[0-9]{10}"
+          required
+          placeholder="১০ সংখ্যার মোবাইল নম্বর"
+        >
+      </div>
+
+      <div class="form-group">
+        <label for="memberPhoto">ছবি আপলোড করুন *</label>
+
+        <input
+          type="file"
+          id="memberPhoto"
+          accept="image/jpeg,image/png,image/webp"
+          required
+        >
+
+        <small>সর্বোচ্চ ৩ MB। JPG, PNG অথবা WEBP।</small>
+      </div>
+
+      <button type="submit" id="memberSubmit" class="btn btn-primary">
+        আবেদন জমা দিন
+      </button>
+
+      <div id="memberMsg" class="registration-message"></div>
+
+    </form>
+  `;
+
+  openModal(content);
+
+  const form = getElement('memberRequestForm');
+
+  form.addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    const name = getElement('memberName').value.trim();
+    const mobile = getElement('memberMobile').value.trim();
+    const file = getElement('memberPhoto').files[0];
+
+    const msg = getElement('memberMsg');
+    const button = getElement('memberSubmit');
+
+    if (!name) {
+      showMessage(msg, 'নাম লিখুন।', 'error');
+      return;
+    }
+
+    if (!/^[0-9]{10}$/.test(mobile)) {
+      showMessage(msg, 'সঠিক মোবাইল নম্বর দিন।', 'error');
+      return;
+    }
+
+    if (!file) {
+      showMessage(msg, 'ছবি নির্বাচন করুন।', 'error');
+      return;
+    }
+
+    if (file.size > 3 * 1024 * 1024) {
+      showMessage(msg, 'ছবির আকার ৩ MB-এর বেশি হতে পারবে না।', 'error');
+      return;
+    }
+
+    button.disabled = true;
+    button.textContent = 'জমা হচ্ছে...';
+
+    try {
+      const base64 = await readFileAsBase64(file);
+
+      const response = await apiPost({
+        action: type,
+        memberName: name,
+        mobile: mobile,
+        photoBase64: base64,
+        photoType: file.type
+      });
+
+      if (response.status !== 'success') {
+        throw new Error(response.message || 'আবেদন জমা হয়নি।');
+      }
+
+      showMessage(
+        msg,
+        'আবেদন সফলভাবে জমা হয়েছে। পরিচালকের অনুমোদনের জন্য অপেক্ষা করুন।',
+        'success'
+      );
 
       form.reset();
 
     } catch (error) {
-      console.error('Registration error:', error);
-
-      msg.textContent =
-        '❌ নিবন্ধন সম্পূর্ণ করা যায়নি। Backend অথবা ইন্টারনেট পরীক্ষা করুন।';
-
-    } finally {
-      if (submitButton) submitButton.disabled = false;
-    }
-  };
-}
-
-// ===============================
-// LOAD APPROVED COMMITTEE PROFILES
-// ===============================
-
-fetch(API + '?action=members')
-  .then(response => {
-    if (!response.ok) throw new Error('Members API error');
-    return response.json();
-  })
-  .then(data => {
-    if (!data.members || !cgrid) return;
-
-    data.members.forEach(m => {
-      const cards = [...document.querySelectorAll('.member-card')];
-
-      let card = cards.find(c =>
-        c.querySelector('h4')?.textContent.trim() ===
-        String(m.name).trim()
+      showMessage(
+        msg,
+        error.message || 'আবেদন জমা দিতে সমস্যা হয়েছে।',
+        'error'
       );
 
-      if (!card && m.status === 'Approved') {
-        cgrid.insertAdjacentHTML('beforeend', `
-          <article class="member-card" style="border-left-color:#0a875c">
-            ${m.photoUrl ? `
-              <img src="${m.photoUrl}"
-                style="width:70px;height:70px;object-fit:cover;border-radius:12px"
-                alt="${m.name}">
-            ` : ''}
+    } finally {
+      button.disabled = false;
+      button.textContent = 'আবেদন জমা দিন';
+    }
+  });
+}
 
-            <h4>${m.name}</h4>
-            ${m.role ? `<p>${m.role}</p>` : ''}
-            <small style="color:#08704c">✓ Profile Complete</small>
-          </article>
-        `);
 
+function readFileAsBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = function () {
+      const result = String(reader.result);
+      const base64 = result.split(',')[1];
+
+      if (!base64) {
+        reject(new Error('ছবি পড়া যায়নি।'));
         return;
       }
 
-      if (card && m.status === 'Approved') {
-        card.style.borderLeftColor = '#0a875c';
+      resolve(base64);
+    };
 
-        card.innerHTML = `
-          ${m.photoUrl ? `
-            <img src="${m.photoUrl}"
-              style="width:70px;height:70px;object-fit:cover;border-radius:12px"
-              alt="${m.name}">
-          ` : ''}
+    reader.onerror = function () {
+      reject(new Error('ছবি পড়তে সমস্যা হয়েছে।'));
+    };
 
-          <h4>${m.name}</h4>
-          ${m.role ? `<p>${m.role}</p>` : ''}
-          <small style="color:#08704c">✓ Profile Complete</small>
-        `;
-      }
+    reader.readAsDataURL(file);
+  });
+}
+
+
+/* =========================================================
+   13. COMMITTEE BUTTONS
+========================================================= */
+
+function setupCommitteeButtons() {
+  const joinButton = getElement('joinCommitteeBtn');
+
+  if (joinButton) {
+    joinButton.addEventListener('click', function () {
+      openMemberForm('newMember');
     });
-  })
-  .catch(error => {
-    console.error('Committee load error:', error);
+  }
+
+  // Delegated KYC button support
+  document.addEventListener('click', function (event) {
+    const button = event.target.closest('[data-kyc]');
+
+    if (button) {
+      openMemberForm('kyc');
+    }
+  });
+}
+
+
+/* =========================================================
+   14. DONATIONS
+========================================================= */
+
+async function loadDonations() {
+  try {
+    const response = await apiGet('donations');
+
+    if (response.status !== 'success') return;
+
+    const summary = response.summary || {};
+
+    const promised = Number(summary.promised || 0);
+    const paid = Number(summary.paid || 0);
+    const due = Number(summary.due || 0);
+
+    const promisedElement = getElement('totalPromised');
+    const paidElement = getElement('totalPaid');
+    const dueElement = getElement('totalDue');
+
+    if (promisedElement) {
+      promisedElement.textContent = formatMoney(promised);
+    }
+
+    if (paidElement) {
+      paidElement.textContent = formatMoney(paid);
+    }
+
+    if (dueElement) {
+      dueElement.textContent = formatMoney(due);
+    }
+
+    renderDonationList(response.donations || []);
+
+  } catch (error) {
+    console.warn('Donation data could not be loaded:', error);
+  }
+}
+
+
+function renderDonationList(donations) {
+  const container = getElement('donationList');
+
+  if (!container) return;
+
+  container.innerHTML = '';
+
+  if (!donations.length) {
+    container.textContent = 'এখনও কোনো তথ্য পাওয়া যায়নি।';
+    return;
+  }
+
+  const table = document.createElement('table');
+
+  table.innerHTML = `
+    <thead>
+      <tr>
+        <th>নাম</th>
+        <th>প্রতিশ্রুত অর্থ</th>
+        <th>অবস্থা</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  `;
+
+  const tbody = table.querySelector('tbody');
+
+  donations.forEach(item => {
+    const tr = document.createElement('tr');
+
+    const name = document.createElement('td');
+    name.textContent = item.name || '';
+
+    const amount = document.createElement('td');
+    amount.textContent = formatMoney(item.amount);
+
+    const status = document.createElement('td');
+    status.textContent = item.status || 'Pending';
+
+    tr.appendChild(name);
+    tr.appendChild(amount);
+    tr.appendChild(status);
+
+    tbody.appendChild(tr);
   });
 
-// ===============================
-// DONATIONS 2026
-// ===============================
-
-const donationList = document.getElementById('donationList');
-
-if (donationList) {
-  fetch(API + '?action=donations')
-    .then(response => {
-      if (!response.ok) throw new Error('Donation API error');
-      return response.json();
-    })
-    .then(data => {
-      const promised = document.getElementById('totalPromised');
-      const paid = document.getElementById('totalPaid');
-      const due = document.getElementById('totalDue');
-
-      if (promised) {
-        promised.textContent =
-          '₹' + Number(data.summary?.promised || 0)
-            .toLocaleString('en-IN');
-      }
-
-      if (paid) {
-        paid.textContent =
-          '₹' + Number(data.summary?.paid || 0)
-            .toLocaleString('en-IN');
-      }
-
-      if (due) {
-        due.textContent =
-          '₹' + Number(data.summary?.due || 0)
-            .toLocaleString('en-IN');
-      }
-
-      donationList.innerHTML = '';
-
-      if (!data.donations || data.donations.length === 0) {
-        donationList.innerHTML =
-          '<p class="donation-loading">এখনও কোনো অনুদানের তথ্য যোগ করা হয়নি।</p>';
-        return;
-      }
-
-      data.donations.forEach(item => {
-        const isPaid =
-          String(item.status).toLowerCase() === 'paid';
-
-        const card = document.createElement('div');
-
-        card.className =
-          'donation-card ' +
-          (isPaid ? 'donation-paid' : 'donation-unpaid');
-
-        const donor = document.createElement('div');
-        donor.className = 'donor-info';
-
-        const donorName = document.createElement('h3');
-        donorName.textContent = item.name || '';
-
-        const donorLabel = document.createElement('span');
-        donorLabel.textContent = 'প্রতিশ্রুত অনুদান';
-
-        donor.appendChild(donorName);
-        donor.appendChild(donorLabel);
-
-        const amount = document.createElement('div');
-        amount.className = 'donation-amount';
-
-        amount.textContent =
-          item.promise ||
-          ('₹' + Number(item.amount || 0).toLocaleString('en-IN'));
-
-        card.appendChild(donor);
-        card.appendChild(amount);
-
-        donationList.appendChild(card);
-      });
-    })
-    .catch(error => {
-      console.error('Donation load error:', error);
-
-      donationList.innerHTML =
-        '<p class="donation-loading">অনুদানের তথ্য লোড করা যায়নি।</p>';
-    });
+  container.appendChild(table);
 }
+
+
+/* =========================================================
+   15. COUNTDOWN
+========================================================= */
+
+function setupCountdown() {
+  const targetDate = new Date('2026-12-30T09:00:00+05:30').getTime();
+
+  function update() {
+    const now = Date.now();
+    let distance = targetDate - now;
+
+    if (distance <= 0) {
+      const countdown = getElement('countdown');
+
+      if (countdown) {
+        countdown.textContent = 'অনুষ্ঠান শুরু হয়েছে';
+      }
+
+      return;
+    }
+
+    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+    distance %= (1000 * 60 * 60 * 24);
+
+    const hours = Math.floor(distance / (1000 * 60 * 60));
+    distance %= (1000 * 60 * 60);
+
+    const minutes = Math.floor(distance / (1000 * 60));
+    distance %= (1000 * 60);
+
+    const seconds = Math.floor(distance / 1000);
+
+    if (getElement('countDays')) {
+      getElement('countDays').textContent = String(days).padStart(2, '0');
+    }
+
+    if (getElement('countHours')) {
+      getElement('countHours').textContent = String(hours).padStart(2, '0');
+    }
+
+    if (getElement('countMinutes')) {
+      getElement('countMinutes').textContent = String(minutes).padStart(2, '0');
+    }
+
+    if (getElement('countSeconds')) {
+      getElement('countSeconds').textContent = String(seconds).padStart(2, '0');
+    }
+  }
+
+  update();
+  setInterval(update, 1000);
+}
+
+
+/* =========================================================
+   16. HERO SLIDER
+========================================================= */
+
+function setupHeroSlider() {
+  const slides = document.querySelectorAll('.hero-slide');
+
+  if (!slides.length) return;
+
+  let current = 0;
+
+  slides.forEach((slide, index) => {
+    slide.classList.toggle('active', index === 0);
+  });
+
+  if (slides.length < 2) return;
+
+  setInterval(() => {
+    slides[current].classList.remove('active');
+
+    current = (current + 1) % slides.length;
+
+    slides[current].classList.add('active');
+
+  }, 6500);
+}
+
+
+/* =========================================================
+   17. MOBILE NAVIGATION
+========================================================= */
+
+function setupNavigation() {
+  const toggle = getElement('menuToggle');
+  const nav = getElement('mainNav');
+
+  if (!toggle || !nav) return;
+
+  toggle.addEventListener('click', function () {
+    nav.classList.toggle('active');
+
+    const expanded = nav.classList.contains('active');
+
+    toggle.setAttribute('aria-expanded', String(expanded));
+  });
+
+  nav.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', function () {
+      nav.classList.remove('active');
+      toggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+}
+
+
+/* =========================================================
+   18. REGISTRATION DEADLINE
+========================================================= */
+
+function checkRegistrationDeadline() {
+  const deadline = new Date('2026-12-29T23:59:59+05:30').getTime();
+
+  if (Date.now() <= deadline) return;
+
+  const button = getElement('registrationSubmit');
+
+  if (button) {
+    button.disabled = true;
+    button.textContent = 'নিবন্ধনের সময় শেষ';
+  }
+
+  const message = getElement('regMsg');
+
+  if (message) {
+    showMessage(
+      message,
+      'অনলাইন নিবন্ধনের সময় শেষ হয়েছে।',
+      'error'
+    );
+  }
+}
+
+
+/* =========================================================
+   19. INITIALIZE WEBSITE
+========================================================= */
+
+document.addEventListener('DOMContentLoaded', function () {
+
+  renderGames();
+
+  renderEventCheckboxes();
+
+  renderSchedule();
+
+  renderInitialMembers();
+
+  setupRegistration();
+
+  setupModal();
+
+  setupCommitteeButtons();
+
+  setupCountdown();
+
+  setupHeroSlider();
+
+  setupNavigation();
+
+  checkRegistrationDeadline();
+
+  loadApprovedMembers();
+
+  loadDonations();
+
+});
+
+
+/************************************************************
+ END OF KOKOND FRONTEND JAVASCRIPT V5
+************************************************************/
